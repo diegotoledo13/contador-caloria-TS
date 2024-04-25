@@ -8,6 +8,10 @@ export type ActivityActions =
   | {
       type: "set-activeId";
       payload: { id: Activity["id"] };
+    }
+  | {
+      type: "delete-activity";
+      payload: { id: Activity["id"] };
     };
 
 export type ActivityState = {
@@ -24,10 +28,18 @@ export const activityReducer = (
   action: ActivityActions
 ) => {
   if (action.type === "save-activity") {
-    //Este codigo es para agregar una nueva actividad en el arreglo de actividades en el estado global de la aplicacion
+    let updateActivities: Activity[] = [];
+    if (state.activeId) {
+      updateActivities = state.activities.map((activity) =>
+        activity.id === state.activeId ? action.payload.newActivity : activity
+      );
+    } else {
+      updateActivities = [...state.activities, action.payload.newActivity];
+    }
     return {
       ...state,
-      activities: [...state.activities, action.payload.newActivity],
+      activities: updateActivities,
+      activeId: "",
     };
   }
   if (action.type === "set-activeId") {
@@ -35,6 +47,14 @@ export const activityReducer = (
     return {
       ...state,
       activeId: action.payload.id,
+    };
+  }
+  if (action.type === "delete-activity") {
+    return {
+      ...state,
+      activities: state.activities.filter(
+        (activity) => activity.id !== action.payload.id
+      ),
     };
   }
   return state;
